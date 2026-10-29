@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>塔塔自动钓鱼</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--fg:#1b1f24;--mut:#6b7280;--line:#e5e7eb;--ok:#15803d;--bad:#b91c1c;--warn:#b45309;--acc:#2563eb}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#171a21;--fg:#e6e8ec;--mut:#9aa3b2;--line:#2a2f3a;--ok:#4ade80;--bad:#f87171;--warn:#fbbf24;--acc:#60a5fa}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 -apple-system,"PingFang SC","Helvetica Neue",sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:20px 16px}h1{font-size:20px;margin:0 0 14px}h2{font-size:15px;margin:0 0 10px;color:var(--mut);font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}.row:last-child{border-bottom:0}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.warn{color:var(--warn)}.mut{color:var(--mut);font-size:12px}
+button{border:1px solid var(--acc);background:transparent;color:var(--acc);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:13px}
+button.pri{background:var(--acc);color:#fff}button.danger{border-color:var(--bad);color:var(--bad)}button:disabled{opacity:.45;cursor:default}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px 16px}
+label{display:block;font-size:12px;color:var(--mut);margin-bottom:3px}input[type=number]{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);font-size:14px}
+.chk{display:flex;align-items:center;gap:6px;font-size:13px;margin-top:20px}
+.stats{display:flex;gap:22px;flex-wrap:wrap;margin:8px 0 10px}.stats b{font-size:20px;font-weight:600;display:block}
+pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;height:300px;overflow:auto;font:12px/1.45 ui-monospace,Menlo,monospace;margin:0;white-space:pre-wrap}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+</style></head><body><div class="wrap">
+<h1>塔塔自动钓鱼</h1>
+
+<div class="card"><h2>环境检测 <button onclick="check()" style="margin-left:8px">重新检测</button></h2><div id="checks">检测中…</div></div>
+
+<div class="card"><h2>运行参数</h2>
+<div class="grid">
+ <div><label>钓几轮（0 = 不限，手动停）</label><input type="number" id="rounds" value="20" min="0"></div>
+ <div><label>提前量 lead_ms（点晚了调大）</label><input type="number" id="lead" value="50" min="0" max="300"></div>
+ <div class="chk"><input type="checkbox" id="restore" checked><label for="restore" style="margin:0;color:var(--fg)">点完把鼠标还给我</label></div>
+ <div class="chk"><input type="checkbox" id="reset" checked><label for="reset" style="margin:0;color:var(--fg)">启动前复位游戏窗口</label></div>
+ <div class="chk"><input type="checkbox" id="dry"><label for="dry" style="margin:0;color:var(--fg)">只识别不点击（测试）</label></div>
+</div>
+<div class="bar" style="margin-top:14px">
+ <button class="pri" id="btnStart" onclick="start()">开始</button>
+ <button class="danger" id="btnStop" onclick="stop()" disabled>停止</button>
+ <span class="mut">急停：把鼠标甩到屏幕左上角</span>
+</div></div>
+
+<div class="card"><h2>运行状态</h2>
+<div class="stats"><div><span class="mut">状态</span><b id="st">-</b></div><div><span class="mut">已钓</span><b id="rd">0</b></div><div><span class="mut">命中</span><b id="ht">0</b></div><div><span class="mut">用时</span><b id="el">0s</b></div></div>
+<pre id="log"></pre></div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const api=(p,b)=>fetch(p,b?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}:{}).then(r=>r.json());
+function li(ok,name,detail,btn){const c=ok===true?'ok':ok===false?'bad':'warn';const m=ok===true?'✓':ok===false?'✕':'?';
+ return `<div class="row"><div><span class="${c}">${m}</span> ${name} <span class="mut">${detail||''}</span></div>${btn||''}</div>`}
+async function check(){const c=await api('/api/check');let h='';
+ h+=li(true,'Python '+c.python,'控制台运行在：'+c.host_app+'（权限要授给这个应用）');
+ h+=li(c.deps_missing.length==0,'依赖包',c.deps_missing.length?'缺：'+c.deps_missing.join(', ')+'，重新运行 安装并启动.command':'');
+ h+=li(c.screen_capture,'屏幕录制权限',c.screen_capture?'':'系统设置→隐私与安全性→屏幕录制，勾上 '+c.host_app+'，然后重启它',c.screen_capture?'':'<button onclick="perm(\'screen\')">去开启</button>');
+ h+=li(c.accessibility,'辅助功能权限',c.accessibility?'':'系统设置→隐私与安全性→辅助功能，勾上 '+c.host_app,c.accessibility?'':'<button onclick="perm(\'ax\')">去开启</button>');
+ h+=li(c.config_ok,'config.json','');
+ const w=c.window;let wd='';
+ if(w){const ref=c.window_size_ref||[0,0];const r=(w.w/ref[0]).toFixed(2);wd=`位置 (${w.x},${w.y}) 尺寸 ${w.w}×${w.h}`+(Math.abs(r-1)>0.02?`，与校准时比例 ${r}，建议点复位`:'')}
+ h+=li(!!w,'游戏窗口「'+c.window_title+'」',w?wd:'没找到：请在微信里打开塔塔冒险队，窗口别最小化、别被遮挡',w?'<button onclick="resetWin()">复位窗口</button>':'');
+ h+=li(c.displays.length>0,'显示器 '+c.displays.length+' 块',c.displays.map(d=>`${d.w}×${d.h}${d.retina?' Retina':''}`).join('，'));
+ $('checks').innerHTML=h;}
+async function perm(w){await api('/api/request_perm',{which:w});setTimeout(check,1500)}
+async function resetWin(){const r=await api('/api/reset_window',{});setTimeout(check,1200)}
+async function start(){const b={rounds:+$('rounds').value,lead_ms:+$('lead').value,restore_cursor:$('restore').checked,reset_window:$('reset').checked,dry:$('dry').checked};
+ const r=await api('/api/start',b);if(!r.ok)alert(r.msg);poll()}
+async function stop(){await api('/api/stop',{});poll()}
+let timer;async function poll(){const s=await api('/api/status');$('st').textContent=s.state;$('rd').textContent=s.rounds;$('ht').textContent=s.hits;$('el').textContent=s.elapsed+'s';
+ const L=$('log');const atEnd=L.scrollHeight-L.scrollTop-L.clientHeight<30;L.textContent=s.lines.join('\n');if(atEnd)L.scrollTop=L.scrollHeight;
+ $('btnStart').disabled=s.running;$('btnStop').disabled=!s.running;clearTimeout(timer);timer=setTimeout(poll,s.running?700:3000)}
+check();poll();
+</script></body></html>

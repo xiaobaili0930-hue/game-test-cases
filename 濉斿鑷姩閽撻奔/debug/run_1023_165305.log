@@ -1,0 +1,8 @@
+日志: C:\Users\lishaolong\Downloads\塔塔自动钓鱼_分发\濉斿鑷姩閽撻奔\debug\run_1023_165305.log
+窗口在 (1159, 68) 尺寸 476x883，缩放 1.000，位移 (320,-9)
+grab=[1265, 591, 300, 290] dry=True replay=None
+[   0.00s] None -> UNKNOWN  ring=[0, 0, 255]
+[   4.08s] UNKNOWN -> WAITING  ring=[0, 0, 179]
+[   7.04s] WAITING -> UNKNOWN  ring=[0, 0, 188]
+
+退出：0 轮 / 0 次命中 / 449 帧

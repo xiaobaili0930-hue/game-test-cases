@@ -1,0 +1,125 @@
+{
+ "monitor": 1,
+ "_说明": "Windows(MuMu模拟器 900x1600@320dpi)适配版：坐标为屏幕物理像素，按校准时窗口位置 window_ref=(839,77)、窗口尺寸 476x883 量的；fish.py 启动时按窗口标题定位并按缩放/位移换算。ROI 与 HSV 均由真人实操录像 play2r.mp4 逐帧实测（内容区 (840,117,474,843)，设备->屏幕缩放 0.5267）。",
+ "window_title": "MuMu安卓设备-1",
+ "window_ref": [
+  839,
+  77
+ ],
+ "window_size": [
+  476,
+  883
+ ],
+ "grab": [
+  945,
+  600,
+  300,
+  290
+ ],
+ "button": [
+  1077,
+  807
+ ],
+ "button_ring_r": 58,
+ "ring_green": [
+  [
+   35,
+   100,
+   150
+  ],
+  [
+   60,
+   255,
+   255
+  ]
+ ],
+ "ring_gray_max_s": 40,
+ "ring_purple": [
+  [
+   125,
+   100,
+   100
+  ],
+  [
+   160,
+   255,
+   255
+  ]
+ ],
+ "ring_dark_v": 120,
+ "bite_roi": [
+  952,
+  619,
+  254,
+  74
+ ],
+ "bite_min_px": 9000,
+ "bite_hsv": [
+  [
+   120,
+   100,
+   150
+  ],
+  [
+   160,
+   255,
+   255
+  ]
+ ],
+ "bar_roi": [
+  945,
+  670,
+  280,
+  30
+ ],
+ "track_hsv": [
+  [
+   95,
+   80,
+   80
+  ],
+  [
+   118,
+   200,
+   190
+  ]
+ ],
+ "zone_hsv": [
+  [
+   20,
+   120,
+   180
+  ],
+  [
+   35,
+   255,
+   255
+  ]
+ ],
+ "bobber_hsv": [
+  [
+   0,
+   120,
+   100
+  ],
+  [
+   14,
+   255,
+   255
+  ]
+ ],
+ "track_min_px": 800,
+ "zone_min_px": 200,
+ "bobber_min_px": 60,
+ "lead_ms": 550,
+ "zone_margin": 0.1,
+ "click_cooldown_ms": 1000,
+ "popup_click_s": 0.5,
+ "fish_retry_s": 1.0,
+ "jitter_px": 3,
+ "vel_min": 30,
+ "vel_max": 400,
+ "track_max_rows": 24,
+ "track_min_cols": 150,
+ "_说明2": "PLAYING 判定护栏：深蓝需成条(行数<=track_max_rows 且列数>=track_min_cols)，且条上要有黄区或红浮标。"
+}

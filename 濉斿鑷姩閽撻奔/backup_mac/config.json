@@ -1,0 +1,125 @@
+{
+  "monitor": 1,
+  "_说明": "坐标为内置屏逻辑点(1470x956)，按校准时窗口 bounds=window_ref 量的；fish.py 启动时按窗口标题定位并平移，窗口尺寸须等于 window_size",
+  "window_title": "塔塔冒险队",
+  "window_ref": [
+    561,
+    57
+  ],
+  "grab": [
+    650,
+    580,
+    280,
+    230
+  ],
+  "button": [
+    786,
+    764
+  ],
+  "button_ring_r": 45,
+  "ring_green": [
+    [
+      35,
+      100,
+      150
+    ],
+    [
+      60,
+      255,
+      255
+    ]
+  ],
+  "ring_gray_max_s": 40,
+  "ring_purple": [
+    [
+      125,
+      100,
+      0
+    ],
+    [
+      155,
+      255,
+      255
+    ]
+  ],
+  "ring_dark_v": 120,
+  "bite_pts": [
+    [
+      680,
+      600
+    ],
+    [
+      900,
+      600
+    ]
+  ],
+  "bite_hsv": [
+    [
+      120,
+      120,
+      180
+    ],
+    [
+      150,
+      200,
+      255
+    ]
+  ],
+  "bar_roi": [
+    665,
+    630,
+    250,
+    28
+  ],
+  "track_hsv": [
+    [
+      100,
+      110,
+      85
+    ],
+    [
+      115,
+      175,
+      175
+    ]
+  ],
+  "zone_hsv": [
+    [
+      20,
+      90,
+      200
+    ],
+    [
+      35,
+      180,
+      255
+    ]
+  ],
+  "bobber_hsv": [
+    [
+      0,
+      100,
+      60
+    ],
+    [
+      12,
+      230,
+      230
+    ]
+  ],
+  "track_min_px": 300,
+  "zone_min_px": 150,
+  "bobber_min_px": 40,
+  "lead_ms": 50,
+  "zone_margin": 0.12,
+  "click_cooldown_ms": 400,
+  "popup_click_s": 0.5,
+  "fish_retry_s": 1.0,
+  "jitter_px": 3,
+  "window_size": [
+    453,
+    848
+  ],
+  "vel_min": 30,
+  "vel_max": 400
+}

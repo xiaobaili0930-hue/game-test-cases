@@ -1,0 +1,9 @@
+mss>=9
+numpy
+opencv-python-headless
+pyautogui
+# pyobjc-* are macOS-only (screen capture / accessibility / window control);
+# on Windows screen.py uses ctypes + User32 instead, so they are skipped there.
+pyobjc-core; sys_platform == "darwin"
+pyobjc-framework-Cocoa; sys_platform == "darwin"
+pyobjc-framework-Quartz; sys_platform == "darwin"
