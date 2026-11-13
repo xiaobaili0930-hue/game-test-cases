@@ -1,7 +1,0 @@
-mss>=9
-numpy
-opencv-python-headless
-pyautogui
-pyobjc-core
-pyobjc-framework-Cocoa
-pyobjc-framework-Quartz
