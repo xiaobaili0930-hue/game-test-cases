@@ -7,6 +7,8 @@ import time
 import unicodedata
 from io import BytesIO
 
+BOT_VERSION = "1.1.0"
+
 
 
 def base_rate(text):
@@ -144,6 +146,8 @@ def image_forward_action(rows, image):
 
 
 def main():
+    print(f"脚本版本：{BOT_VERSION}（基础胜率判断版，忽略右侧加成）", flush=True)
+    print("运行文件：" + str(Path(__file__).resolve()), flush=True)
     import numpy as np
     from PIL import Image
     from rapidocr_onnxruntime import RapidOCR
