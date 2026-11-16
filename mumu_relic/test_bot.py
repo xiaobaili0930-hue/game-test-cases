@@ -76,6 +76,22 @@ class Decisions(unittest.TestCase):
         self.assertIsNone(decide([('再开一组', .40, .50, .891)]))
         self.assertIsNone(decide([button, ('开心收下', .70, .50, .92)]))
 
+    def test_floor_seven_rate_from_uploaded_log(self):
+        rows = [
+            ('小骨头', .7152510732412338, .39111111111111113, .44),
+            ('撤离', .6335145433743795, .25833333333333336, .775625),
+            ('战斗', .6296811501185099, .7288888888888889, .7740625),
+            ('我方胜率', .7413298964500428, .6222222222222222, .8703125),
+            ('55% + 8%', .680629187160068, .795, .8678125),
+        ]
+        self.assertEqual(decide(rows)[:2], ('战斗', 55))
+        rows[-1] = ('29% + 8%', .680629187160068, .795, .8678125)
+        self.assertEqual(decide(rows)[:2], ('撤离', 29))
+        rows[-1] = ('55% + 8%', .64, .795, .8678125)
+        self.assertIsNone(decide(rows))
+        rows[-1] = ('55% + 8%', .680629187160068, .795, .94)
+        self.assertIsNone(decide(rows))
+
     def test_home(self):
         self.assertEqual(decide([('遗迹探险',.794,.5,.04),
                                  ('万去探险!',.608,.553,.854)])[0], '去探险')
