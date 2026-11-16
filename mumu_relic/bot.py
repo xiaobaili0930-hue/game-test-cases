@@ -29,6 +29,20 @@ def decide(rows):
         and 0.80 < r[3] < 0.98]
     if len(reward_continue) == 1:
         return '关闭宝物展示', None, 0.50, 0.50
+    blessing = any(
+        ('点金之触' in text.replace(' ', '')
+         or '下一个宝藏的价值提升' in text.replace(' ', ''))
+        and score >= 0.55 and 0.30 < y < 0.65
+        for text, score, x, y in rows
+    )
+    happy_collect = [r for r in rows
+        if r[0].replace(' ', '') == '开心收下'
+        and r[1] >= 0.50 and 0.25 < r[2] < 0.75
+        and 0.80 < r[3] < 0.98]
+    if blessing:
+        if len(happy_collect) == 1:
+            return '开心收下', None, happy_collect[0][2], happy_collect[0][3]
+        return None
     finished = any(
         '探险结束' in text and score >= 0.60 and y < 0.20
         for text, score, x, y in rows
@@ -98,7 +112,7 @@ def image_forward_action(rows, image):
 
     # Keep overlays and Boss decisions out of this fallback.
     if any(any(word in text.replace(' ', '') for word in
-               ('胜率', '战斗', '撤离', '点击任意', '探险结束', '收下'))
+               ('胜率', '战斗', '撤离', '点击任意', '探险结束', '收下', '点金之触', '价值提升'))
            for text, score, x, y in rows):
         return None
     if not any('探险第' in text and '层' in text and score >= 0.60
@@ -260,4 +274,20 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception:
+        import traceback
+        details = traceback.format_exc()
+        log_path = Path(__file__).resolve().with_name("bot_error.log")
+        try:
+            log_path.write_text(details, encoding="utf-8")
+            print("程序异常，已保存日志：" + str(log_path), flush=True)
+        except OSError:
+            print("无法写入异常日志。", flush=True)
+        print(details, flush=True)
+        try:
+            input("请保存报错信息，按回车退出。")
+        except (EOFError, KeyboardInterrupt):
+            pass
+        raise SystemExit(1)
