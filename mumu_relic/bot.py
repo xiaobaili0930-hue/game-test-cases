@@ -7,7 +7,7 @@ import time
 import unicodedata
 from io import BytesIO
 
-BOT_VERSION = "1.1.1"
+BOT_VERSION = "1.2.0"
 
 
 
@@ -145,6 +145,40 @@ def image_forward_action(rows, image):
     return None
 
 
+def read_console_key():
+    # Windows console input; does not require Enter.
+    try:
+        import msvcrt
+    except ImportError:
+        return ''
+    if msvcrt.kbhit():
+        return msvcrt.getwch().lower()
+    return ''
+
+
+def wait_for_resume(read_key=None):
+    read_key = read_key or read_console_key
+    print('已暂停。可手动处理游戏画面；点击本窗口，按 R 继续。Ctrl+C 退出。', flush=True)
+    while True:
+        if read_key() == 'r':
+            print('已继续，将重新截图并确认后再点击。', flush=True)
+            return
+        time.sleep(0.05)
+
+
+def wait_with_controls(seconds=0, read_key=None):
+    read_key = read_key or read_console_key
+    deadline = time.monotonic() + seconds
+    while True:
+        if read_key() == 'p':
+            wait_for_resume(read_key)
+            return True
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            return False
+        time.sleep(min(0.05, remaining))
+
+
 def main():
     print(f"脚本版本：{BOT_VERSION}（基础胜率判断版，忽略右侧加成）", flush=True)
     print("运行文件：" + str(Path(__file__).resolve()), flush=True)
@@ -186,10 +220,14 @@ def main():
         "实际点击模式" if args.run else "试运行：只识别，不点击",
         flush=True,
     )
-    print("请打开游戏竖屏探险主页。按 Ctrl+C 停止。", flush=True)
+    print("请打开游戏竖屏探险主页。P 暂停，R 继续，Ctrl+C 退出（按键前先点击本窗口）。", flush=True)
 
     try:
         while True:
+            if wait_with_controls():
+                previous = None
+                unknown = 0
+                unknown_since = None
             loop_delay = 0.5
             raw = device("exec-out", "screencap", "-p")
             image = Image.open(BytesIO(raw)).convert("RGB")
@@ -235,7 +273,11 @@ def main():
                         [(r[0], round(r[1], 3)) for r in rows],
                         flush=True,
                     )
-                    break
+                    wait_for_resume()
+                    previous = None
+                    unknown = 0
+                    unknown_since = None
+                    continue
             else:
                 unknown = 0
                 unknown_since = None
@@ -255,6 +297,9 @@ def main():
                 )
 
                 if stable and args.run:
+                    if wait_with_controls():
+                        previous = None
+                        continue
                     device(
                         "shell", "input", "tap",
                         str(round(x * width)),
@@ -265,7 +310,10 @@ def main():
                 else:
                     previous = action
 
-            time.sleep(loop_delay)
+            if wait_with_controls(loop_delay):
+                previous = None
+                unknown = 0
+                unknown_since = None
 
     except KeyboardInterrupt:
         print("\n已停止", flush=True)
