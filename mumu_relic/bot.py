@@ -92,6 +92,49 @@ def decide(rows):
     return None
 
 
+def image_forward_action(rows, image):
+    """Fallback for a missed OCR label: verify the green torch button."""
+    import numpy as np
+
+    # Keep overlays and Boss decisions out of this fallback.
+    if any(any(word in text.replace(' ', '') for word in
+               ('胜率', '战斗', '撤离', '点击任意', '探险结束', '收下'))
+           for text, score, x, y in rows):
+        return None
+    if not any('探险第' in text and '层' in text and score >= 0.60
+               and y < 0.15 for text, score, x, y in rows):
+        return None
+    width, height = image.size
+    if width >= height:
+        return None
+    yy, xx = np.mgrid[-1:1:96j, -1:1:96j]
+    radius = np.sqrt(xx * xx + yy * yy)
+    ring = (radius > 0.48) & (radius < 0.83)
+    core = radius < 0.45
+    for cy in (0.81, 0.82, 0.83, 0.84):
+        for scale in (0.15, 0.165, 0.18):
+            r = width * scale
+            cx, center_y = width * 0.5, height * cy
+            crop = image.crop((round(cx-r), round(center_y-r),
+                               round(cx+r), round(center_y+r)))
+            a = np.asarray(crop.convert('RGB').resize((96, 96)), dtype=float)
+            red, green, blue = a[:, :, 0], a[:, :, 1], a[:, :, 2]
+            emerald = ((green > 110) & (green > red * 1.20)
+                       & (green > blue * 0.95))
+            flame = ((red > 175) & (green > 65) & (green < red * 0.92)
+                     & (blue < green * 0.75))
+            # The ring must surround the center on all four sides. This
+            # excludes the off-center green evacuation panel on Boss pages.
+            if emerald[ring].mean() < 0.65 or flame[core].mean() < 0.025:
+                continue
+            quadrants = [(xx < 0) & (yy < 0), (xx >= 0) & (yy < 0),
+                         (xx < 0) & (yy >= 0), (xx >= 0) & (yy >= 0)]
+            if all(emerald[ring & quadrant].mean() >= 0.45
+                   for quadrant in quadrants):
+                return '前进', None, 0.50, cy
+    return None
+
+
 def main():
     import numpy as np
     from PIL import Image
@@ -151,6 +194,10 @@ def main():
                 rows.append((text, float(score), x, y))
 
             action = decide(rows)
+            if action is None:
+                action = image_forward_action(rows, image)
+                if action is not None:
+                    print('图像识别：前进按钮（不读取倍率和火把数量）', flush=True)
 
             if action is None:
                 previous = None
