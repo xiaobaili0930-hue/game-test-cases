@@ -168,6 +168,7 @@ def main():
     ocr = RapidOCR()
     previous = None
     unknown = 0
+    unknown_since = None
 
     print(
         "实际点击模式" if args.run else "试运行：只识别，不点击",
@@ -177,6 +178,7 @@ def main():
 
     try:
         while True:
+            loop_delay = 0.5
             raw = device("exec-out", "screencap", "-p")
             image = Image.open(BytesIO(raw)).convert("RGB")
             width, height = image.size
@@ -202,9 +204,11 @@ def main():
             if action is None:
                 previous = None
                 unknown += 1
+                if unknown_since is None:
+                    unknown_since = time.monotonic()
                 print("等待画面 / 无法可靠识别", flush=True)
 
-                if unknown >= 12:
+                if unknown >= 12 and time.monotonic() - unknown_since >= 25:
                     image.save("unrecognized.png")
                     Path("unrecognized.json").write_text(
                         json.dumps(rows, ensure_ascii=False, indent=2),
@@ -222,6 +226,7 @@ def main():
                     break
             else:
                 unknown = 0
+                unknown_since = None
                 name, rate, x, y = action
 
                 stable = (
@@ -244,11 +249,11 @@ def main():
                         str(round(y * height)),
                     )
                     previous = None
-                    time.sleep(5)
+                    loop_delay = 2.5 if name in ("战斗", "撤离") else 1.2
                 else:
                     previous = action
 
-            time.sleep(2)
+            time.sleep(loop_delay)
 
     except KeyboardInterrupt:
         print("\n已停止", flush=True)
