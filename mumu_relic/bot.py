@@ -73,7 +73,7 @@ def decide(rows):
                    and r[1] >= 0.60 and r[2] > 0.50 and r[3] > 0.75]
         values = []
         for r in rows:
-            if r[1] < 0.70 or not (0.50 < r[2] < 0.98 and 0.75 < r[3] < 0.98):
+            if r[1] < 0.65 or not (0.50 < r[2] < 0.98 and 0.75 < r[3] < 0.98):
                 continue
             text = unicodedata.normalize('NFKC', r[0]).replace(' ', '')
             value = base_rate(text)
