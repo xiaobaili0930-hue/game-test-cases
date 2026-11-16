@@ -1,5 +1,6 @@
 import unittest
-from bot import decide, image_forward_action
+from bot import decide, image_forward_action, wait_for_resume, wait_with_controls
+from unittest.mock import patch
 
 class Decisions(unittest.TestCase):
     def boss(self, percent, confidence=.727):
@@ -99,6 +100,18 @@ class Decisions(unittest.TestCase):
         self.assertIsNone(decide([('确定', .70, .10, .891)]))
         self.assertIsNone(decide([('确定', .40, .50, .891)]))
         self.assertIsNone(decide([button, ('再开一组', .70, .50, .92)]))
+
+    def test_pause_waits_for_r_without_restarting(self):
+        keys = iter(['p', '', 'x', 'r'])
+        with patch('bot.time.sleep'), patch('builtins.print'):
+            self.assertTrue(wait_with_controls(0, lambda: next(keys)))
+        with patch('builtins.print'):
+            self.assertFalse(wait_with_controls(0, lambda: ''))
+
+    def test_unknown_screen_can_wait_for_resume(self):
+        keys = iter(['', 'p', 'r'])
+        with patch('bot.time.sleep'), patch('builtins.print'):
+            wait_for_resume(lambda: next(keys))
 
     def test_home(self):
         self.assertEqual(decide([('遗迹探险',.794,.5,.04),
