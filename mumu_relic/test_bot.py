@@ -69,6 +69,13 @@ class Decisions(unittest.TestCase):
         self.assertIsNone(decide([title, ('开心收下', .65, .1, .92)]))
         self.assertIsNone(decide([title, collect, collect]))
 
+    def test_open_another_group_at_user_request(self):
+        button = ('再开一组', .70, .50, .891)
+        self.assertEqual(decide([button]), ('再开一组', None, .50, .891))
+        self.assertIsNone(decide([('再开一组', .70, .50, .30)]))
+        self.assertIsNone(decide([('再开一组', .40, .50, .891)]))
+        self.assertIsNone(decide([button, ('开心收下', .70, .50, .92)]))
+
     def test_home(self):
         self.assertEqual(decide([('遗迹探险',.794,.5,.04),
                                  ('万去探险!',.608,.553,.854)])[0], '去探险')
