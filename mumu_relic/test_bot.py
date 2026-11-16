@@ -57,13 +57,14 @@ class Decisions(unittest.TestCase):
         from PIL import ImageEnhance
         self.assertIsNone(image_forward_action(rows, ImageEnhance.Brightness(image).enhance(.3)))
 
-    def test_blessing_collect_requires_matching_popup_and_button(self):
+    def test_happy_collect_ignores_reward_title(self):
         title = ('点金之触', .70, .5, .46)
         subtitle = ('下一个宝藏的价值提升', .70, .5, .52)
         collect = ('开心收下', .65, .5, .92)
         self.assertEqual(decide([title, collect])[:2], ('开心收下', None))
         self.assertEqual(decide([subtitle, collect])[:2], ('开心收下', None))
-        self.assertIsNone(decide([collect]))
+        self.assertEqual(decide([collect])[:2], ('开心收下', None))
+        self.assertEqual(decide([('圣光护体', .3, .5, .46), collect])[:2], ('开心收下', None))
         self.assertIsNone(decide([title]))
         self.assertIsNone(decide([title, ('开心收下', .65, .1, .92)]))
         self.assertIsNone(decide([title, collect, collect]))
