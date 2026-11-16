@@ -1,5 +1,5 @@
 import unittest
-from bot import decide
+from bot import decide, image_forward_action
 
 class Decisions(unittest.TestCase):
     def boss(self, percent, confidence=.727):
@@ -39,6 +39,24 @@ class Decisions(unittest.TestCase):
         rows[2] = ('我方胜率', .662, .63, .70)
         self.assertIsNone(decide(rows))
 
+    def test_image_fallback_when_forward_text_is_missing(self):
+        from PIL import Image, ImageDraw
+        image = Image.new('RGB', (450, 800), '#b29661')
+        draw = ImageDraw.Draw(image)
+        cx, cy, radius = 225, 656, 74
+        draw.ellipse((cx-radius, cy-radius, cx+radius, cy+radius),
+                     fill='#15ca85', outline='black', width=4)
+        draw.rectangle((cx-8, cy-22, cx+8, cy+14), fill='#ff9814')
+        # The word on the button is deliberately absent.
+        rows = [('探险第2层', .753, .50, .04), ('5倍场', .578, .50, .08)]
+        self.assertIsNone(decide(rows))
+        self.assertEqual(image_forward_action(rows, image)[:2], ('前进', None))
+        self.assertIsNone(image_forward_action([], image))
+        self.assertIsNone(image_forward_action(rows + [('战斗', .4, .75, .8)], image))
+        self.assertIsNone(image_forward_action(rows + [('点击任意位置继续', .4, .5, .92)], image))
+        from PIL import ImageEnhance
+        self.assertIsNone(image_forward_action(rows, ImageEnhance.Brightness(image).enhance(.3)))
+
     def test_home(self):
         self.assertEqual(decide([('遗迹探险',.794,.5,.04),
                                  ('万去探险!',.608,.553,.854)])[0], '去探险')
@@ -55,3 +73,4 @@ class Decisions(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
