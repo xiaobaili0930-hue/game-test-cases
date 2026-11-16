@@ -92,6 +92,14 @@ class Decisions(unittest.TestCase):
         rows[-1] = ('55% + 8%', .680629187160068, .795, .94)
         self.assertIsNone(decide(rows))
 
+    def test_final_gacha_group_confirm(self):
+        button = ('确定', .70, .50, .891)
+        self.assertEqual(decide([button]), ('确定', None, .50, .891))
+        self.assertIsNone(decide([('确定', .70, .50, .40)]))
+        self.assertIsNone(decide([('确定', .70, .10, .891)]))
+        self.assertIsNone(decide([('确定', .40, .50, .891)]))
+        self.assertIsNone(decide([button, ('再开一组', .70, .50, .92)]))
+
     def test_home(self):
         self.assertEqual(decide([('遗迹探险',.794,.5,.04),
                                  ('万去探险!',.608,.553,.854)])[0], '去探险')
