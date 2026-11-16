@@ -62,7 +62,7 @@ def decide(rows):
                     for r in rows if r[3] > 0.5)
     if fight and leave:
         anchors = [r for r in rows if '我方胜率' in r[0].replace(' ', '')
-                   and r[1] >= 0.70 and r[2] > 0.50 and r[3] > 0.75]
+                   and r[1] >= 0.60 and r[2] > 0.50 and r[3] > 0.75]
         values = []
         for r in rows:
             if r[1] < 0.70 or not (0.50 < r[2] < 0.98 and 0.75 < r[3] < 0.98):
