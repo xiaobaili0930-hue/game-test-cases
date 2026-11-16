@@ -7,7 +7,7 @@ import time
 import unicodedata
 from io import BytesIO
 
-BOT_VERSION = "1.1.0"
+BOT_VERSION = "1.1.1"
 
 
 
@@ -32,7 +32,7 @@ def decide(rows):
     if len(reward_continue) == 1:
         return '关闭宝物展示', None, 0.50, 0.50
     happy_collect = [r for r in rows
-        if r[0].replace(' ', '') in ('开心收下', '再开一组')
+        if r[0].replace(' ', '') in ('开心收下', '再开一组', '确定')
         and r[1] >= 0.50 and 0.25 < r[2] < 0.75
         and 0.80 < r[3] < 0.98]
     if len(happy_collect) == 1:
@@ -108,7 +108,7 @@ def image_forward_action(rows, image):
 
     # Keep overlays and Boss decisions out of this fallback.
     if any(any(word in text.replace(' ', '') for word in
-               ('胜率', '战斗', '撤离', '点击任意', '探险结束', '收下', '再开一组', '点金之触', '价值提升'))
+               ('胜率', '战斗', '撤离', '点击任意', '探险结束', '收下', '再开一组', '确定', '点金之触', '价值提升'))
            for text, score, x, y in rows):
         return None
     if not any('探险第' in text and '层' in text and score >= 0.60
