@@ -29,19 +29,13 @@ def decide(rows):
         and 0.80 < r[3] < 0.98]
     if len(reward_continue) == 1:
         return '关闭宝物展示', None, 0.50, 0.50
-    blessing = any(
-        ('点金之触' in text.replace(' ', '')
-         or '下一个宝藏的价值提升' in text.replace(' ', ''))
-        and score >= 0.55 and 0.30 < y < 0.65
-        for text, score, x, y in rows
-    )
     happy_collect = [r for r in rows
         if r[0].replace(' ', '') == '开心收下'
         and r[1] >= 0.50 and 0.25 < r[2] < 0.75
         and 0.80 < r[3] < 0.98]
-    if blessing:
-        if len(happy_collect) == 1:
-            return '开心收下', None, happy_collect[0][2], happy_collect[0][3]
+    if len(happy_collect) == 1:
+        return '开心收下', None, happy_collect[0][2], happy_collect[0][3]
+    if len(happy_collect) > 1:
         return None
     finished = any(
         '探险结束' in text and score >= 0.60 and y < 0.20
