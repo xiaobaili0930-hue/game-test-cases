@@ -27,6 +27,18 @@ class Decisions(unittest.TestCase):
         self.assertIsNone(decide([('前进',.518,.504,.863)]))
         self.assertIsNone(decide([title,('前进',.518,.1,.863)]))
 
+    def test_low_confidence_split_label_from_floor_10(self):
+        # Text/confidences are from the user log; coordinates model the
+        # established layout because this log did not include coordinates.
+        rows = [('撤离', .648, .25, .774), ('战斗', .64, .729, .774),
+                ('我方胜率', .662, .63, .875),
+                ('40% + 8%', .705, .84, .875)]
+        self.assertEqual(decide(rows)[:2], ('战斗', 40))
+        rows[2] = ('我方胜率', .59, .63, .875)
+        self.assertIsNone(decide(rows))
+        rows[2] = ('我方胜率', .662, .63, .70)
+        self.assertIsNone(decide(rows))
+
     def test_home(self):
         self.assertEqual(decide([('遗迹探险',.794,.5,.04),
                                  ('万去探险!',.608,.553,.854)])[0], '去探险')
